@@ -6,6 +6,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>MAILOVE</title>
+  <!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EGGL58BFH0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config','G-EGGL58BFH0', { 'anonymize_ip': true });
+</script>
   <link rel="icon" href="data:;base64,=">
   <link
     rel="preload"
@@ -59,6 +67,7 @@
       </div>
     </section>
   </main>
+  
 
   <audio id="bg-music" src="mailove.mp3" preload="auto"></audio>
 
@@ -66,6 +75,20 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
   <script defer src="script.js"></script>
   <script defer src="petalos.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const audio = document.getElementById('bg-music');
+    if (!audio) return;
+    audio.addEventListener('play', () => {
+      if (typeof gtag === 'function') {
+        gtag('event', 'play_audio', {
+          'event_category': 'audio',
+          'event_label': 'mensaje_mailove'
+        });
+      }
+    });
+  });
+</script>
 </body>
 
 </html>
