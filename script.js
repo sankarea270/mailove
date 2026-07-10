@@ -56,10 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         initContador();
         animatePoema();
+        initNarrativas();
       }
     });
   }
 });
+
+function initNarrativas() {
+  const secciones = document.querySelectorAll('.narrative');
+  if (!('IntersectionObserver' in window) || secciones.length === 0) {
+    secciones.forEach(s => s.classList.add('in-view'));
+    return;
+  }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('in-view');
+    });
+  }, { threshold: 0.35 });
+  secciones.forEach(s => obs.observe(s));
+}
 
 function initContador() {
   actualizarContador();

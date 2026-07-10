@@ -41,6 +41,7 @@
 <body>
 
   <canvas id="petal-canvas"></canvas>
+  <canvas id="heart-canvas"></canvas>
 
   <div id="overlay" role="dialog" aria-modal="true" aria-hidden="false">
     <h1>My Love</h1>
@@ -52,18 +53,64 @@
   </div>
 
   <main id="main-content" class="is-hidden">
-    <!-- Contador -->
     <section id="counter" aria-live="polite">
       <p>0 años 0 meses 0 días 0 horas 0 minutos 0 segundos amándote chikita</p>
     </section>
 
-    <section id="poem-container">
-      <h2>para ti mi princesa</h2>
-      <div id="poem">
-        <p class="line"></p>
-        <p class="line"></p>
-        <p class="line"></p>
-        <p class="line"></p>
+    <aside id="poem-aside">
+      <section id="poem-container">
+        <h2>para ti mi princesa</h2>
+        <div id="poem">
+          <p class="line"></p>
+          <p class="line"></p>
+          <p class="line"></p>
+          <p class="line"></p>
+        </div>
+      </section>
+    </aside>
+
+    <section class="narrative">
+      <h2 class="big-title">Para mi princesa</h2>
+      <p class="sub">respira conmigo, mi corazón late por ti</p>
+    </section>
+    <section class="narrative">
+      <h2 class="big-title">Cada latido, tuyo</h2>
+      <p class="sub">te amo más cada día, sin prisa, para siempre</p>
+    </section>
+    <section class="narrative">
+      <h2 class="big-title">Mi universo eres tú</h2>
+      <p class="sub">mi corazón arde de naranja cuando pienso en ti</p>
+    </section>
+    <section class="narrative">
+      <h2 class="big-title">Contigo, el infinito</h2>
+      <p class="sub">cada scroll, un latido más cerca de ti</p>
+    </section>
+    <section class="narrative">
+      <h2 class="big-title">Para siempre</h2>
+      <p class="sub">en calma, en rojo, en nosotros</p>
+    </section>
+
+    <div id="hidden-entry">
+      <input
+        type="password"
+        id="secret-input"
+        placeholder="···"
+        aria-label="Ingreso oculto"
+        autocomplete="off"
+      />
+    </div>
+
+    <section id="video-vault" class="is-hidden">
+      <h2>Nuestros videos</h2>
+      <div id="vault-controls">
+        <label id="upload-label" for="video-input">
+          Guardar video
+        </label>
+        <input type="file" id="video-input" accept="video/*" multiple />
+      </div>
+      <div id="video-list"></div>
+      <div id="video-player-wrap" class="is-hidden">
+        <video id="video-player" controls></video>
       </div>
     </section>
   </main>
@@ -73,8 +120,11 @@
 
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+  <script defer src="heart.js"></script>
   <script defer src="script.js"></script>
   <script defer src="petalos.js"></script>
+  <script defer src="vault.js"></script>
+  <script defer src="cursor.js"></script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const audio = document.getElementById('bg-music');
