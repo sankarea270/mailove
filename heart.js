@@ -281,9 +281,14 @@ function onScroll(){
 window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('resize', onScroll);
 
+// En celulares el raymarcher es muy costoso: bajamos la resolución interna
+// (se ve casi igual pero rinde mucho mejor y evita que se trabe).
+const esMovil = window.matchMedia('(max-width: 820px)').matches ||
+                window.matchMedia('(pointer: coarse)').matches;
+
 let dpr = 1;
 function resize(){
-  dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  dpr = Math.min(window.devicePixelRatio || 1, esMovil ? 0.7 : 1.5);
   const w = Math.floor(window.innerWidth * dpr);
   const h = Math.floor(window.innerHeight * dpr);
   if (heartCanvas.width !== w || heartCanvas.height !== h){

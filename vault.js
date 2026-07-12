@@ -25,24 +25,47 @@ if (typeof supabase !== 'undefined' && supabase.createClient) {
 
 let unlocked = false;
 
-// Escribe la contraseña y presiona Enter para abrir la bóveda.
-secretInput.addEventListener('keydown', async (e) => {
-  if (e.key !== 'Enter' || unlocked || !sb) return;
-  e.preventDefault();
+// Mensaje de estado bajo el campo (para que nunca "no pase nada" en silencio).
+const secretMsg = document.createElement('p');
+secretMsg.id = 'secret-msg';
+secretInput.insertAdjacentElement('afterend', secretMsg);
+function setEstado(txt) { secretMsg.textContent = txt || ''; }
+
+if (!sb) setEstado('No se cargó Supabase (revisa tu conexión)');
+
+async function intentarAbrir() {
+  if (unlocked || !sb) return;
   const pass = secretInput.value.trim();
   if (!pass) return;
 
   secretInput.disabled = true;
-  const { error } = await sb.auth.signInWithPassword({ email: SHARED_EMAIL, password: pass });
+  setEstado('Abriendo…');
+
+  let error = null;
+  try {
+    const res = await sb.auth.signInWithPassword({ email: SHARED_EMAIL, password: pass });
+    error = res.error;
+  } catch (e) {
+    error = { message: 'Sin conexión con el servidor' };
+  }
   secretInput.disabled = false;
 
   if (error) {
-    // Contraseña incorrecta: pequeño aviso visual y limpiar.
     secretInput.value = '';
+    secretInput.focus();
+    const m = (error.message || '').toLowerCase();
+    if (m.includes('not confirmed') || m.includes('confirm')) {
+      setEstado('La cuenta no está confirmada en Supabase');
+    } else if (m.includes('invalid')) {
+      setEstado('Contraseña incorrecta');
+    } else {
+      setEstado(error.message);
+    }
     gsap.fromTo(secretInput, { x: -6 }, { x: 0, duration: 0.4, ease: 'elastic.out(1, 0.3)' });
     return;
   }
 
+  setEstado('');
   unlocked = true;
   secretInput.value = '';
   secretInput.blur();
@@ -55,7 +78,13 @@ secretInput.addEventListener('keydown', async (e) => {
     }
   });
   loadVideos();
+}
+
+// Abre con Enter (y limpia el mensaje al empezar a escribir de nuevo).
+secretInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); intentarAbrir(); }
 });
+secretInput.addEventListener('input', () => { if (!unlocked) setEstado(''); });
 
 async function loadVideos() {
   videoList.innerHTML = '';

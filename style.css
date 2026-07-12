@@ -279,6 +279,16 @@ body {
   color: rgba(255, 255, 255, 0.6);
 }
 
+#secret-msg {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  line-height: 1.5;
+  color: #ff9ec4;
+  text-align: center;
+  margin-top: 0.6rem;
+  min-height: 1em;
+}
+
 #video-vault {
   max-width: 640px;
   margin: 0 auto 3rem;
@@ -429,7 +439,13 @@ input, label, .video-thumb, a, button { cursor: none; }
 
 @media (max-width: 820px) {
   #model-container {
-    display: none !important;
+    left: 50%;
+    top: auto;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: min(220px, 60vw);
+    height: min(280px, 34vh);
+    z-index: 0;            /* detrás del texto (main-content es z-index:1) */
   }
   #poem-aside {
     position: static;
