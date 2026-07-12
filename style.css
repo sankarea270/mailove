@@ -1,5 +1,4 @@
 
-
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 * {
@@ -68,6 +67,83 @@ body {
   opacity: 0;         
   transform: scale(3);
   transform-origin: center;
+}
+
+#model-container {
+  position: fixed;
+  left: 4vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(440px, 38vw);
+  height: min(640px, 70vh);
+  z-index: 4;
+  pointer-events: none;
+}
+
+#model-container canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.proposal-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.proposal-title {
+  font-family: 'Dancing Script', cursive;
+  color: #ff7ab0;
+  font-size: 3rem;
+}
+
+.proposal-question {
+  font-family: 'Dancing Script', cursive;
+  color: #fff;
+  font-size: 2.6rem;
+}
+
+.proposal-buttons {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+#btn-si {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.2rem;
+  padding: 14px 40px;
+  background: #F685FF;
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 0 30px rgba(246, 133, 255, 0.5);
+  transition: transform 0.2s;
+}
+
+#btn-si:hover {
+  transform: scale(1.1);
+}
+
+#btn-no {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.2rem;
+  padding: 14px 30px;
+  background: #333;
+  color: #888;
+  border: 1px solid #555;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.accepted-text {
+  font-family: 'Dancing Script', cursive;
+  color: #F685FF;
+  font-size: 3.5rem;
+  text-shadow: 0 0 40px rgba(246, 133, 255, 0.6);
 }
 
 #main-content {
@@ -352,6 +428,9 @@ body {
 input, label, .video-thumb, a, button { cursor: none; }
 
 @media (max-width: 820px) {
+  #model-container {
+    display: none !important;
+  }
   #poem-aside {
     position: static;
     transform: none;

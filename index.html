@@ -8,11 +8,19 @@
   <title>MAILOVE</title>
   <!-- Google Analytics 4 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-EGGL58BFH0"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config','G-EGGL5B8HF0', { 'anonymize_ip': true });
+  gtag('config','G-EGGL58BFH0', { 'anonymize_ip': true });
 </script>
   <link rel="icon" href="data:;base64,=">
   <link
@@ -44,17 +52,15 @@
   <canvas id="heart-canvas"></canvas>
 
   <div id="overlay" role="dialog" aria-modal="true" aria-hidden="false">
-    <h1>My Love</h1>
-    <img
-      id="heart"
-      src="pngegg.png"
-      alt="Corazón pixel-art clicable para revelar el contenido"
-    />
+    <h1 id="overlay-title">My Love</h1>
+    <img id="heart" src="pngegg.png" alt="" />
   </div>
+
+  <div id="model-container" class="is-hidden"></div>
 
   <main id="main-content" class="is-hidden">
     <section id="counter" aria-live="polite">
-      <p>0 años 0 meses 0 días 0 horas 0 minutos 0 segundos amándote chikita</p>
+      <p>0 años 0 meses 0 días 0 horas 0 minutos 0 segundos amándote mi princesa</p>
     </section>
 
     <aside id="poem-aside">
@@ -123,8 +129,10 @@
   <script defer src="heart.js"></script>
   <script defer src="script.js"></script>
   <script defer src="petalos.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="vault.js"></script>
   <script defer src="cursor.js"></script>
+  <script defer type="module" src="model3d.js"></script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const audio = document.getElementById('bg-music');

@@ -1,6 +1,13 @@
-// vault.js
+// vault.js — bóveda de videos privada con Supabase.
+// La contraseña que ella escribe es la de una cuenta COMPARTIDA de Supabase
+// (no vive en este código). Al validarla, Supabase da acceso al bucket privado.
 
-const SECRET_PASSWORD = 'shiro';
+// ── 1) Rellena estos valores con los de TU proyecto (ver pasos abajo) ──────────
+const SUPABASE_URL      = 'https://fcosljygktbfrsjiswge.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjb3Nsanlna3RiZnJzamlzd2dlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4ODM3NDEsImV4cCI6MjA5OTQ1OTc0MX0.l4kE_wOYAzWg9oHoiIF-lJjQrJLZeAdDRh6b_FROl-k';        // clave "anon/public": es segura de exponer
+const SHARED_EMAIL      = 'manuel270147123@gmail.com'; // email de la cuenta compartida que crees
+const BUCKET            = 'videos';              // nombre del bucket privado
+// ──────────────────────────────────────────────────────────────────────────────
 
 const secretInput   = document.getElementById('secret-input');
 const videoVault    = document.getElementById('video-vault');
@@ -9,83 +16,46 @@ const videoList     = document.getElementById('video-list');
 const playerWrap    = document.getElementById('video-player-wrap');
 const videoPlayer   = document.getElementById('video-player');
 
+let sb = null;
+if (typeof supabase !== 'undefined' && supabase.createClient) {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  console.error('No se cargó el cliente de Supabase (revisa la etiqueta <script> del CDN).');
+}
+
 let unlocked = false;
 
-secretInput.addEventListener('input', () => {
-  if (unlocked) return;
-  if (secretInput.value.trim().toLowerCase() === SECRET_PASSWORD) {
-    unlocked = true;
+// Escribe la contraseña y presiona Enter para abrir la bóveda.
+secretInput.addEventListener('keydown', async (e) => {
+  if (e.key !== 'Enter' || unlocked || !sb) return;
+  e.preventDefault();
+  const pass = secretInput.value.trim();
+  if (!pass) return;
+
+  secretInput.disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email: SHARED_EMAIL, password: pass });
+  secretInput.disabled = false;
+
+  if (error) {
+    // Contraseña incorrecta: pequeño aviso visual y limpiar.
     secretInput.value = '';
-    secretInput.blur();
-    gsap.to(videoVault, {
-      duration: 0.6,
-      autoAlpha: 1,
-      onStart: () => {
-        videoVault.classList.remove('is-hidden');
-        videoVault.style.visibility = 'visible';
-      }
-    });
-    loadVideos();
+    gsap.fromTo(secretInput, { x: -6 }, { x: 0, duration: 0.4, ease: 'elastic.out(1, 0.3)' });
+    return;
   }
+
+  unlocked = true;
+  secretInput.value = '';
+  secretInput.blur();
+  gsap.to(videoVault, {
+    duration: 0.6,
+    autoAlpha: 1,
+    onStart: () => {
+      videoVault.classList.remove('is-hidden');
+      videoVault.style.visibility = 'visible';
+    }
+  });
+  loadVideos();
 });
-
-const DB_NAME = 'mailove-vault';
-const STORE   = 'videos';
-let dbPromise = null;
-
-function openDB() {
-  if (dbPromise) return dbPromise;
-  dbPromise = new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains(STORE)) {
-        db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror   = () => reject(req.error);
-  });
-  return dbPromise;
-}
-
-async function saveVideo(file) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).add({
-      name: file.name,
-      type: file.type,
-      blob: file,
-      created: Date.now()
-    });
-    tx.oncomplete = () => resolve();
-    tx.onerror    = () => reject(tx.error);
-  });
-}
-
-async function getAllVideos() {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readonly');
-    const req = tx.objectStore(STORE).getAll();
-    req.onsuccess = () => {
-      const items = req.result.sort((a, b) => b.created - a.created);
-      resolve(items);
-    };
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function deleteVideo(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).delete(id);
-    tx.oncomplete = () => resolve();
-    tx.onerror    = () => reject(tx.error);
-  });
-}
 
 async function loadVideos() {
   videoList.innerHTML = '';
@@ -93,14 +63,18 @@ async function loadVideos() {
   videoPlayer.pause();
   videoPlayer.removeAttribute('src');
 
-  let videos = [];
+  let files = [];
   try {
-    videos = await getAllVideos();
+    const { data, error } = await sb.storage.from(BUCKET).list('', {
+      sortBy: { column: 'created_at', order: 'desc' }
+    });
+    if (error) throw error;
+    files = (data || []).filter(f => f.id); // ignora entradas de carpeta
   } catch (err) {
     console.error('Error al leer videos:', err);
   }
 
-  if (videos.length === 0) {
+  if (files.length === 0) {
     const empty = document.createElement('p');
     empty.id = 'vault-empty';
     empty.textContent = 'Aún no hay videos. Guarda uno para empezar.';
@@ -108,14 +82,19 @@ async function loadVideos() {
     return;
   }
 
-  const empty = document.getElementById('vault-empty');
-  if (empty) empty.remove();
+  for (const item of files) {
+    let url = '';
+    try {
+      const { data: signed } = await sb.storage.from(BUCKET).createSignedUrl(item.name, 3600);
+      url = signed?.signedUrl || '';
+    } catch (err) {
+      console.error('Error al firmar URL:', err);
+      continue;
+    }
 
-  videos.forEach(item => {
     const card = document.createElement('div');
     card.className = 'video-thumb';
 
-    const url = URL.createObjectURL(item.blob);
     const preview = document.createElement('video');
     preview.src = url;
     preview.muted = true;
@@ -123,7 +102,7 @@ async function loadVideos() {
 
     const name = document.createElement('div');
     name.className = 'video-name';
-    name.textContent = item.name || 'video';
+    name.textContent = item.name.replace(/^\d+-/, '') || 'video';
 
     const del = document.createElement('button');
     del.className = 'video-delete';
@@ -132,8 +111,11 @@ async function loadVideos() {
     del.title = 'Eliminar';
     del.addEventListener('click', async (e) => {
       e.stopPropagation();
-      await deleteVideo(item.id);
-      URL.revokeObjectURL(url);
+      try {
+        await sb.storage.from(BUCKET).remove([item.name]);
+      } catch (err) {
+        console.error('Error al eliminar:', err);
+      }
       loadVideos();
     });
 
@@ -149,15 +131,19 @@ async function loadVideos() {
     card.appendChild(name);
     card.appendChild(del);
     videoList.appendChild(card);
-  });
+  }
 }
 
 videoInput.addEventListener('change', async () => {
+  if (!unlocked || !sb) return;
   const files = Array.from(videoInput.files || []);
   for (const file of files) {
     if (file && file.type.startsWith('video/')) {
+      const safe = file.name.replace(/[^\w.\-]/g, '_');
+      const path = `${Date.now()}-${safe}`;
       try {
-        await saveVideo(file);
+        const { error } = await sb.storage.from(BUCKET).upload(path, file, { upsert: false });
+        if (error) throw error;
       } catch (err) {
         console.error('Error al guardar video:', err);
       }
@@ -166,3 +152,4 @@ videoInput.addEventListener('change', async () => {
   videoInput.value = '';
   loadVideos();
 });
+
