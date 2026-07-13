@@ -221,7 +221,7 @@ function animatePoema() {
     "You remind me of the color blue,",
     "girl, I'm so in love with you.",
     "Para mí, tú eres mi color azul,",
-    "y aunque esté lejos, te veo en mis sueños siempre."
+    "y aun en la distancia, sigues siendo mi calma."
   ];
 
   const lines = document.querySelectorAll('#poem .line');
