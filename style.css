@@ -309,6 +309,15 @@ body {
   margin-bottom: 1.5rem;
 }
 
+#upload-msg {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  line-height: 1.6;
+  color: #eafff9;
+  margin-top: 0.9rem;
+  min-height: 1em;
+}
+
 #upload-label {
   display: inline-block;
   font-family: 'Press Start 2P', monospace;
